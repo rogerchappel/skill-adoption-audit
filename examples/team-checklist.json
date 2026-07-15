@@ -1,0 +1,12 @@
+{
+  "checks": [
+    {
+      "id": "release-candidate-notes",
+      "level": "warning",
+      "description": "Release-candidate notes are present",
+      "type": "file",
+      "path": "docs/RELEASE_CANDIDATE.md"
+    }
+  ]
+}
+
