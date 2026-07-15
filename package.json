@@ -1,0 +1,33 @@
+{
+  "name": "skill-adoption-audit",
+  "version": "0.1.0",
+  "description": "Audit agent skill packages for adoption-ready docs, examples, fixtures, and verification.",
+  "type": "module",
+  "bin": {
+    "skill-adoption-audit": "./src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/*.js test/*.test.js",
+    "smoke": "node src/cli.js fixtures/good-skill --format markdown"
+  },
+  "keywords": [
+    "agent-skills",
+    "audit",
+    "adoption",
+    "documentation",
+    "ci"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "src",
+    "docs",
+    "fixtures",
+    "SKILL.md",
+    "README.md"
+  ]
+}
+
