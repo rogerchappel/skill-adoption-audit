@@ -9,9 +9,13 @@ async function main(argv) {
   }
 
   const flags = parseFlags(rest);
+  const format = flags.format ?? 'markdown';
+  if (format !== 'markdown' && format !== 'json') {
+    throw new Error(`unsupported format: ${format}; expected markdown or json`);
+  }
+
   const extraChecks = await loadChecklist(flags.checklist);
   const report = await auditSkill(root, { extraChecks });
-  const format = flags.format ?? 'markdown';
   process.stdout.write(format === 'json' ? formatJson(report) : formatMarkdown(report));
 
   if (flags.strict === true && report.status !== 'pass') {
@@ -42,4 +46,3 @@ main(process.argv.slice(2)).catch((error) => {
   process.stderr.write(`${error.message}\n`);
   process.exitCode = 1;
 });
-
