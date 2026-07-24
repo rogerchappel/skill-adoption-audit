@@ -21,6 +21,8 @@ skill-adoption-audit <skill-dir> [--checklist checklist.json] [--format markdown
 ```
 
 Strict mode exits non-zero when required adoption items are missing.
+Unknown options, extra positional arguments, and options missing required values
+exit with status 1 and print an actionable error to standard error.
 
 ## What It Checks
 
@@ -42,4 +44,3 @@ Strict mode exits non-zero when required adoption items are missing.
 
 This tool reads local files only. It does not publish packages, mutate
 repositories, call network services, or install dependencies.
-
