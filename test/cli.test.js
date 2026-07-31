@@ -23,6 +23,14 @@ test('accepts each documented option', () => {
   assert.equal(strict.stderr, '');
 });
 
+test('prints help without requiring a skill directory', () => {
+  const result = runCli('--help');
+
+  assert.equal(result.status, 0);
+  assert.equal(result.stderr, '');
+  assert.match(result.stdout, /^Usage: skill-adoption-audit/);
+});
+
 test('rejects an unknown option', () => {
   const result = runCli('fixtures/good-skill', '--bogus');
 

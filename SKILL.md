@@ -22,10 +22,14 @@ status.
 
 ## Workflow
 
-1. Run `skill-adoption-audit <skill-dir>`.
+From this repository checkout, use `node src/cli.js`. If the package archive is
+installed in a separate project, replace that prefix with
+`npx --no-install skill-adoption-audit`.
+
+1. Run `node src/cli.js <skill-dir>`.
 2. Review blockers first.
 3. Fix missing adoption evidence in the skill package.
-4. Re-run with `--strict` before release-candidate handoff.
+4. Re-run with `node src/cli.js <skill-dir> --strict` before release-candidate handoff.
 5. Attach the markdown or JSON report to the release notes.
 
 ## Examples
@@ -37,5 +41,6 @@ node src/cli.js fixtures/weak-skill --format json --strict
 
 ## Verification
 
-Run `npm test`, `npm run check`, and `npm run smoke`.
-
+Run `npm test`, `npm run check`, `npm run smoke`, and `npm run smoke:package`.
+The package smoke check packs the checkout, installs it in a clean temporary
+project, prints CLI help, and performs a strict audit through the installed bin.

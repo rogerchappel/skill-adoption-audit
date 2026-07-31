@@ -3,6 +3,11 @@ import { auditSkill, loadChecklist } from './audit.js';
 import { formatJson, formatMarkdown } from './report.js';
 
 async function main(argv) {
+  if (argv.length === 1 && (argv[0] === '--help' || argv[0] === '-h')) {
+    process.stdout.write('Usage: skill-adoption-audit <skill-dir> [--checklist checklist.json] [--format markdown|json] [--strict]\n');
+    return;
+  }
+
   const [root, ...rest] = argv;
   if (!root) {
     throw new Error('usage: skill-adoption-audit <skill-dir> [--checklist checklist.json] [--format markdown|json] [--strict]');
