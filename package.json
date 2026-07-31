@@ -9,7 +9,8 @@
   "scripts": {
     "test": "node --test",
     "check": "node --check src/*.js test/*.test.js",
-    "smoke": "node src/cli.js fixtures/good-skill --format markdown"
+    "smoke": "node src/cli.js fixtures/good-skill --format markdown",
+    "smoke:package": "bash scripts/smoke-package.sh"
   },
   "keywords": [
     "agent-skills",
@@ -30,4 +31,3 @@
     "README.md"
   ]
 }
-
