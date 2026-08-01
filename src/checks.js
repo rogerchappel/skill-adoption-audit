@@ -42,17 +42,17 @@ export const DEFAULT_CHECKS = [
     id: 'examples',
     level: 'warning',
     description: 'Examples are included',
-    type: 'phrase',
+    type: 'markdown-section',
     path: 'SKILL.md',
-    phrases: ['example', 'examples']
+    headings: ['example', 'examples']
   },
   {
     id: 'verification',
     level: 'blocker',
     description: 'Validation or verification workflow exists',
-    type: 'phrase',
+    type: 'markdown-section',
     path: 'SKILL.md',
-    phrases: ['verification', 'validation', 'npm test', 'smoke']
+    headings: ['verification', 'validation']
   },
   {
     id: 'readme',
@@ -90,4 +90,3 @@ export const DEFAULT_CHECKS = [
     path: 'test'
   }
 ];
-
