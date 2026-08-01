@@ -51,16 +51,19 @@ exit with status 1 and print an actionable error to standard error.
 - `SKILL.md` exists and names when to use the skill
 - Required inputs are documented
 - Side-effect boundaries and approval requirements are explicit
-- Examples are present
-- Validation or verification workflow is present
+- An `Example` or `Examples` Markdown section contains a non-empty fenced code block
+- A `Validation` or `Verification` Markdown section contains a non-empty fenced code block
 - README, docs, fixtures, package metadata, and tests are discoverable
 
 ## Limitations
 
 - The audit uses deterministic text and file checks.
+- Keyword mentions, empty sections, and placeholder-only sections such as `TBD`,
+  `pending`, or `coming soon` do not qualify as example or verification evidence.
 - It does not prove that examples are semantically correct.
 - Custom checklist support augments the default checks; it does not remove the
-  safety checks.
+  safety checks. Custom phrase checks retain literal, case-insensitive substring
+  matching; use them only when that deterministic meaning is intended.
 
 ## Safety Notes
 

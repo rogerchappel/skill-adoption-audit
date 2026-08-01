@@ -49,7 +49,38 @@ async function runCheck(root, check) {
     const found = (check.phrases ?? []).some((phrase) => lower.includes(String(phrase).toLowerCase()));
     return withStatus(check, found);
   }
+  if (check.type === 'markdown-section') {
+    const content = await readText(path.join(root, check.path));
+    return withStatus(check, hasUsableMarkdownSection(content, check.headings ?? []));
+  }
   throw new Error(`unsupported check type: ${check.type}`);
+}
+
+function hasUsableMarkdownSection(content, headings) {
+  const wanted = new Set(headings.map((heading) => String(heading).toLowerCase()));
+  const lines = content.split(/\r?\n/);
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const match = /^(#{1,6})\s+(.+?)\s*$/.exec(lines[index]);
+    if (!match || !wanted.has(match[2].replace(/\s+#+$/, '').toLowerCase())) continue;
+
+    const level = match[1].length;
+    const section = [];
+    for (index += 1; index < lines.length; index += 1) {
+      const nextHeading = /^(#{1,6})\s+/.exec(lines[index]);
+      if (nextHeading && nextHeading[1].length <= level) {
+        index -= 1;
+        break;
+      }
+      section.push(lines[index]);
+    }
+
+    const body = section.join('\n').trim();
+    if (!body || /^(?:tbd|todo|pending|coming soon|none|n\/a)[.!\s]*$/i.test(body)) continue;
+    if (/```[\w-]*\n[\s\S]*?\S[\s\S]*?```/.test(body)) return true;
+  }
+
+  return false;
 }
 
 function withStatus(check, passed) {
@@ -84,4 +115,3 @@ async function isDirectory(filePath) {
     return false;
   }
 }
-

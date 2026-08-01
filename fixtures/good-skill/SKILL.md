@@ -16,9 +16,13 @@ Human approval is needed before external changes.
 
 ## Examples
 
-Run the smoke command.
+```bash
+node ../../src/cli.js . --format markdown
+```
 
 ## Verification
 
-Run npm test and npm run smoke.
-
+```bash
+npm test
+npm run smoke
+```
