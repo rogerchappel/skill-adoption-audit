@@ -48,9 +48,9 @@ exit with status 1 and print an actionable error to standard error.
 
 ## What It Checks
 
-- `SKILL.md` exists and names when to use the skill
-- Required inputs are documented
-- Side-effect boundaries and approval requirements are explicit
+- `SKILL.md` exists and affirmatively states when to use the skill
+- Required inputs have affirmative documentation
+- Side-effect boundaries and approval requirements are affirmatively stated
 - An `Example` or `Examples` Markdown section contains a non-empty fenced code block
 - A `Validation` or `Verification` Markdown section contains a non-empty fenced code block
 - README, docs, fixtures, package metadata, and tests are discoverable
@@ -58,8 +58,13 @@ exit with status 1 and print an actionable error to standard error.
 ## Limitations
 
 - The audit uses deterministic text and file checks.
-- Keyword mentions, empty sections, and placeholder-only sections such as `TBD`,
-  `pending`, or `coming soon` do not qualify as example or verification evidence.
+- Default phrase evidence must be an affirmative statement or a matching Markdown
+  heading with substantive content. Negated missing-evidence claims such as `not
+  documented` or `does not exist`, and placeholders such as `TBD`, `pending`, or
+  `coming soon`, do not qualify. Headings alone do not qualify.
+- Example and verification evidence requires a matching Markdown heading and a
+  non-empty fenced code block; keyword mentions and placeholder-only sections do
+  not qualify.
 - It does not prove that examples are semantically correct.
 - Custom checklist support augments the default checks; it does not remove the
   safety checks. Custom phrase checks retain literal, case-insensitive substring

@@ -9,7 +9,7 @@ export const DEFAULT_CHECKS = [
   {
     id: 'when-to-use',
     level: 'blocker',
-    description: 'Skill explains when to use it',
+    description: 'Skill affirmatively explains when to use it',
     type: 'affirmative-phrase',
     path: 'SKILL.md',
     phrases: ['use this skill', 'when to use']
@@ -17,7 +17,7 @@ export const DEFAULT_CHECKS = [
   {
     id: 'required-inputs',
     level: 'blocker',
-    description: 'Required inputs are documented',
+    description: 'Required inputs have affirmative documentation',
     type: 'affirmative-phrase',
     path: 'SKILL.md',
     phrases: ['required inputs', 'inputs']
@@ -25,7 +25,7 @@ export const DEFAULT_CHECKS = [
   {
     id: 'side-effects',
     level: 'blocker',
-    description: 'Side-effect boundaries are explicit',
+    description: 'Side-effect boundaries are affirmatively stated',
     type: 'affirmative-phrase',
     path: 'SKILL.md',
     phrases: ['side-effect', 'side effect', 'read-only']
@@ -33,7 +33,7 @@ export const DEFAULT_CHECKS = [
   {
     id: 'approval',
     level: 'warning',
-    description: 'Approval requirements are stated',
+    description: 'Approval requirements are affirmatively stated',
     type: 'affirmative-phrase',
     path: 'SKILL.md',
     phrases: ['approval']
