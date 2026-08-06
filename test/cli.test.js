@@ -72,3 +72,18 @@ test('rejects unsupported output formats', () => {
   assert.equal(result.stdout, '');
   assert.match(result.stderr, /unsupported format: yaml; expected markdown or json/);
 });
+
+test('strict JSON output blocks misleading default phrase evidence', () => {
+  const result = runCli('fixtures/misleading-skill', '--format', 'json', '--strict');
+  const report = JSON.parse(result.stdout);
+
+  assert.equal(result.status, 2);
+  assert.equal(report.status, 'block');
+  assert.deepEqual(report.blockers.map(({ id }) => id), [
+    'when-to-use',
+    'required-inputs',
+    'side-effects',
+    'verification'
+  ]);
+  assert.ok(report.warnings.some(({ id }) => id === 'approval'));
+});

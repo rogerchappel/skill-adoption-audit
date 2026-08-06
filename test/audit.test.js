@@ -36,6 +36,53 @@ Inputs are documented.
 This is read-only.
 `;
 
+test('rejects negated and placeholder-only default phrase evidence', async () => {
+  const report = await auditWithSkillMarkdown(`# Misleading Skill
+Do not use this skill.
+Required inputs are not documented.
+No side effect boundaries are defined.
+Approval is TBD.
+`);
+
+  for (const id of ['when-to-use', 'required-inputs', 'side-effects']) {
+    assert.equal(report.results.find((result) => result.id === id).status, 'fail');
+    assert.ok(report.blockers.some((result) => result.id === id));
+  }
+  assert.equal(report.results.find((result) => result.id === 'approval').status, 'fail');
+  assert.ok(report.warnings.some((result) => result.id === 'approval'));
+  assert.equal(report.status, 'block');
+});
+
+test('does not treat default check headings as affirmative evidence', async () => {
+  const report = await auditWithSkillMarkdown(`# Heading-Only Skill
+## When to Use
+TBD
+## Required Inputs
+None documented.
+## Side Effects
+Missing.
+## Approval
+Pending.
+`);
+
+  for (const id of ['when-to-use', 'required-inputs', 'side-effects', 'approval']) {
+    assert.equal(report.results.find((result) => result.id === id).status, 'fail');
+  }
+});
+
+test('accepts representative affirmative default phrase evidence', async () => {
+  const report = await auditWithSkillMarkdown(`# Affirmative Skill
+Use this skill when reviewing a local package.
+Inputs: a package directory and configuration file.
+All operations are read-only.
+Ask for approval before writing outside the package.
+`);
+
+  for (const id of ['when-to-use', 'required-inputs', 'side-effects', 'approval']) {
+    assert.equal(report.results.find((result) => result.id === id).status, 'pass');
+  }
+});
+
 test('does not accept negated example and verification keyword mentions', async () => {
   const report = await auditWithSkillMarkdown(`${requiredDocumentation}\nNo examples are included. Verification does not exist.`);
   assert.equal(report.results.find(({ id }) => id === 'examples').status, 'fail');
