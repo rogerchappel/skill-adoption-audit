@@ -49,11 +49,55 @@ async function runCheck(root, check) {
     const found = (check.phrases ?? []).some((phrase) => lower.includes(String(phrase).toLowerCase()));
     return withStatus(check, found);
   }
+  if (check.type === 'affirmative-phrase') {
+    const content = await readText(path.join(root, check.path));
+    return withStatus(check, hasAffirmativePhrase(content, check.phrases ?? []));
+  }
   if (check.type === 'markdown-section') {
     const content = await readText(path.join(root, check.path));
     return withStatus(check, hasUsableMarkdownSection(content, check.headings ?? []));
   }
   throw new Error(`unsupported check type: ${check.type}`);
+}
+
+function hasAffirmativePhrase(content, phrases) {
+  const wanted = phrases.map((phrase) => String(phrase).toLowerCase());
+  const lines = content.split(/\r?\n/);
+  const statements = content
+    .split(/\r?\n/)
+    .filter((line) => !/^\s*#{1,6}\s+/.test(line))
+    .flatMap((line) => line.split(/(?<=[.!?;])\s+/))
+    .map((statement) => statement.replace(/^\s*(?:[-*+]\s+|\d+[.)]\s+)/, '').trim().toLowerCase())
+    .filter(Boolean);
+
+  if (statements.some((statement) => {
+    if (!wanted.some((phrase) => statement.includes(phrase))) return false;
+    return !hasMissingOrPlaceholderClaim(statement);
+  })) return true;
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = /^\s*#{1,6}\s+(.+?)\s*#*\s*$/.exec(lines[index]);
+    if (!heading || !wanted.some((phrase) => heading[1].toLowerCase().includes(phrase))) continue;
+
+    const body = [];
+    for (index += 1; index < lines.length && !/^\s*#{1,6}\s+/.test(lines[index]); index += 1) {
+      body.push(lines[index]);
+    }
+    index -= 1;
+
+    const statement = body.join(' ').replace(/\s+/g, ' ').trim().toLowerCase();
+    if (statement && !hasMissingOrPlaceholderClaim(statement)) return true;
+  }
+
+  return false;
+}
+
+function hasMissingOrPlaceholderClaim(statement) {
+  return /\b(?:tbd|todo|pending|coming soon|missing|undocumented|unspecified|undefined)\b/.test(statement)
+    || /\bnone\b.+\b(?:documented|defined|specified|stated|available|included)\b/.test(statement)
+    || /\b(?:not|never)\s+(?:currently\s+)?(?:documented|defined|specified|stated|available|included)\b/.test(statement)
+    || /\b(?:does|do)\s+not\s+(?:exist|use)\b/.test(statement)
+    || /\bno\s+.+\b(?:is|are)\s+(?:documented|defined|specified|stated|available|included)\b/.test(statement);
 }
 
 function hasUsableMarkdownSection(content, headings) {

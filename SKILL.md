@@ -41,11 +41,12 @@ node src/cli.js fixtures/weak-skill --format json --strict
 
 ## Verification
 
-Example and verification evidence qualifies only when the corresponding
-Markdown heading contains a non-empty fenced code block. Negated keyword
-mentions and placeholder-only sections (`TBD`, `pending`, or `coming soon`) do
-not qualify. Custom checklist phrase checks remain literal, case-insensitive
-substring matches and always augment the defaults.
+Default phrase evidence qualifies only as an affirmative statement or a
+matching Markdown heading with substantive content. Negated missing-evidence
+claims and placeholder-only statements do not qualify. Example and verification
+evidence qualifies only when the corresponding Markdown heading contains a
+non-empty fenced code block. Custom checklist phrase checks remain literal,
+case-insensitive substring matches and always augment the defaults.
 
 Run `npm test`, `npm run check`, `npm run smoke`, and `npm run smoke:package`.
 The package smoke check packs the checkout, installs it in a clean temporary
