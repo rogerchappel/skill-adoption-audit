@@ -59,9 +59,13 @@ exit with status 1 and print an actionable error to standard error.
 
 - The audit uses deterministic text and file checks.
 - Default phrase evidence must be an affirmative statement or a matching Markdown
-  heading with substantive content. Negated missing-evidence claims such as `not
-  documented` or `does not exist`, and placeholders such as `TBD`, `pending`, or
-  `coming soon`, do not qualify. Headings alone do not qualify.
+  heading with substantive content. Direct negation or prohibition of the matching
+  term (for example, `never use this skill`, `inputs are prohibited`, or `approval
+  is disallowed`) does not qualify. Neither do missing-evidence claims such as `not
+  documented` or placeholders such as `TBD`. Negative safety boundaries remain
+  valid evidence: `performs no writes` supports the side-effect check, and `no
+  approval is required` documents an approval boundary. Headings alone do not
+  qualify.
 - Example and verification evidence requires a matching Markdown heading and a
   non-empty fenced code block; keyword mentions and placeholder-only sections do
   not qualify.
