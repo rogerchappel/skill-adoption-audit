@@ -83,6 +83,22 @@ Ask for approval before writing outside the package.
   }
 });
 
+test('accepts affirmative fixture including negative safety boundaries', async () => {
+  const report = await auditSkill('fixtures/affirmative-evidence');
+
+  for (const id of ['when-to-use', 'required-inputs', 'side-effects', 'approval']) {
+    assert.equal(report.results.find((result) => result.id === id).status, 'pass');
+  }
+});
+
+test('rejects direct negation and prohibition for every default affirmative check', async () => {
+  const report = await auditSkill('fixtures/negated-evidence');
+
+  for (const id of ['when-to-use', 'required-inputs', 'side-effects', 'approval']) {
+    assert.equal(report.results.find((result) => result.id === id).status, 'fail');
+  }
+});
+
 test('does not accept negated example and verification keyword mentions', async () => {
   const report = await auditWithSkillMarkdown(`${requiredDocumentation}\nNo examples are included. Verification does not exist.`);
   assert.equal(report.results.find(({ id }) => id === 'examples').status, 'fail');

@@ -71,9 +71,12 @@ function hasAffirmativePhrase(content, phrases) {
     .filter(Boolean);
 
   if (statements.some((statement) => {
-    if (!wanted.some((phrase) => statement.includes(phrase))) return false;
+    const phrase = wanted.find((candidate) => statement.includes(candidate));
+    if (!phrase || hasDirectNegation(statement, phrase)) return false;
     return !hasMissingOrPlaceholderClaim(statement);
   })) return true;
+
+  if (wanted.includes('read-only') && statements.some(hasNoWriteBoundary)) return true;
 
   for (let index = 0; index < lines.length; index += 1) {
     const heading = /^\s*#{1,6}\s+(.+?)\s*#*\s*$/.exec(lines[index]);
@@ -92,12 +95,26 @@ function hasAffirmativePhrase(content, phrases) {
   return false;
 }
 
+function hasDirectNegation(statement, phrase) {
+  const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const before = new RegExp(`\\b(?:do|does|must|should|may|can|will)\\s+not\\s+(?:\\w+[ -]?){0,3}${escaped}\\b`);
+  const neverBefore = new RegExp(`\\bnever\\s+(?:\\w+[ -]?){0,3}${escaped}\\b`);
+  const after = new RegExp(`\\b${escaped}\\b.{0,32}\\b(?:is|are|be|being)\\s+(?:not\\s+(?:accepted|allowed|provided|supported|used)|prohibited|forbidden|disallowed)\\b`);
+  const directlyNegated = new RegExp(`\\bnot\\s+${escaped}\\b`);
+  return before.test(statement) || neverBefore.test(statement) || after.test(statement) || directlyNegated.test(statement);
+}
+
+function hasNoWriteBoundary(statement) {
+  return /\b(?:performs?|makes?|does)\s+no\s+(?:file(?:system)?\s+)?writes?\b/.test(statement);
+}
+
 function hasMissingOrPlaceholderClaim(statement) {
   return /\b(?:tbd|todo|pending|coming soon|missing|undocumented|unspecified|undefined)\b/.test(statement)
     || /\bnone\b.+\b(?:documented|defined|specified|stated|available|included)\b/.test(statement)
     || /\b(?:not|never)\s+(?:currently\s+)?(?:documented|defined|specified|stated|available|included)\b/.test(statement)
     || /\b(?:does|do)\s+not\s+(?:exist|use)\b/.test(statement)
-    || /\bno\s+.+\b(?:is|are)\s+(?:documented|defined|specified|stated|available|included)\b/.test(statement);
+    || /\bno\s+.+\b(?:is|are)\s+(?:documented|defined|specified|stated|available|included)\b/.test(statement)
+    || /^(?:prohibited|forbidden|disallowed)[.!]?$/i.test(statement);
 }
 
 function hasUsableMarkdownSection(content, headings) {

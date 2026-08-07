@@ -43,10 +43,13 @@ node src/cli.js fixtures/weak-skill --format json --strict
 
 Default phrase evidence qualifies only as an affirmative statement or a
 matching Markdown heading with substantive content. Negated missing-evidence
-claims and placeholder-only statements do not qualify. Example and verification
-evidence qualifies only when the corresponding Markdown heading contains a
-non-empty fenced code block. Custom checklist phrase checks remain literal,
-case-insensitive substring matches and always augment the defaults.
+claims, direct negation or prohibition of the matching term, and placeholder-only
+statements do not qualify. Negative safety boundaries do qualify: `performs no
+writes` supports side-effect evidence, and `no approval is required` states an
+approval boundary. Example and verification evidence qualifies only when the
+corresponding Markdown heading contains a non-empty fenced code block. Custom
+checklist phrase checks remain literal, case-insensitive substring matches and
+always augment the defaults.
 
 Run `npm test`, `npm run check`, `npm run smoke`, and `npm run smoke:package`.
 The package smoke check packs the checkout, installs it in a clean temporary
