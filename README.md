@@ -46,6 +46,20 @@ Pass `--help` (or `-h`) to print the command usage.
 Unknown options, extra positional arguments, and options missing required values
 exit with status 1 and print an actionable error to standard error.
 
+### Custom checklist schema
+
+A checklist is a JSON object with a `checks` array. Every check requires a
+non-empty string `id`, `description`, and `path`, plus one of these `type`
+values: `file`, `directory`, `phrase`, `affirmative-phrase`, or
+`markdown-section`. The optional `level` is `blocker` or `warning` and defaults
+to `warning`. `phrase` and `affirmative-phrase` checks also require a non-empty
+`phrases` array of non-empty strings; `markdown-section` checks require the
+equivalent `headings` array.
+
+The CLI validates the complete checklist before starting an audit. A malformed
+entry exits with status 1 and identifies its array index and invalid field on
+standard error.
+
 ## What It Checks
 
 - `SKILL.md` exists and affirmatively states when to use the skill
