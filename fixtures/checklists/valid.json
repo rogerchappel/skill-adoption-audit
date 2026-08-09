@@ -1,0 +1,9 @@
+{
+  "checks": [
+    {"id":"skill-file","description":"Skill file exists","level":"blocker","type":"file","path":"SKILL.md"},
+    {"id":"docs-directory","description":"Docs directory exists","type":"directory","path":"docs"},
+    {"id":"usage-phrase","description":"Usage is mentioned","type":"phrase","path":"SKILL.md","phrases":["use this skill"]},
+    {"id":"usage-claim","description":"Usage is documented","type":"affirmative-phrase","path":"SKILL.md","phrases":["use this skill"]},
+    {"id":"example-section","description":"Example is executable","type":"markdown-section","path":"SKILL.md","headings":["Example","Examples"]}
+  ]
+}

@@ -73,6 +73,34 @@ test('rejects unsupported output formats', () => {
   assert.match(result.stderr, /unsupported format: yaml; expected markdown or json/);
 });
 
+for (const [fixture, message] of [
+  ['invalid-entry', 'checklist checks[0] must be an object'],
+  ['invalid-type', 'checklist checks[0].type must be one of: file, directory, phrase, affirmative-phrase, markdown-section'],
+  ['blank-id', 'checklist checks[0].id must be a non-empty string'],
+  ['blank-description', 'checklist checks[0].description must be a non-empty string'],
+  ['invalid-level', 'checklist checks[0].level must be one of: blocker, warning'],
+  ['missing-path', 'checklist checks[0].path must be a non-empty string for type directory'],
+  ['invalid-phrases', 'checklist checks[0].phrases must be a non-empty array of non-empty strings for type phrase'],
+  ['missing-headings', 'checklist checks[0].headings must be a non-empty array of non-empty strings for type markdown-section']
+]) {
+  test(`reports ${fixture} checklist entries without internal errors`, () => {
+    const result = runCli('fixtures/good-skill', '--checklist', `fixtures/checklists/${fixture}.json`);
+
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, '');
+    assert.equal(result.stderr, `${message}\n`);
+    assert.doesNotMatch(result.stderr, /TypeError|Cannot read properties|stack/i);
+  });
+}
+
+test('runs an audit with every supported custom check type', () => {
+  const result = runCli('fixtures/good-skill', '--checklist', 'fixtures/checklists/valid.json', '--format', 'json');
+
+  assert.equal(result.status, 0);
+  assert.equal(result.stderr, '');
+  assert.equal(JSON.parse(result.stdout).results.length, 17);
+});
+
 test('strict JSON output blocks misleading default phrase evidence', () => {
   const result = runCli('fixtures/misleading-skill', '--format', 'json', '--strict');
   const report = JSON.parse(result.stdout);

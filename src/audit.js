@@ -33,7 +33,44 @@ export async function loadChecklist(filePath) {
   if (!Array.isArray(parsed.checks)) {
     throw new Error('checklist JSON must contain a checks array');
   }
+  parsed.checks.forEach(validateCheck);
   return parsed.checks;
+}
+
+const CHECK_TYPES = new Set(['file', 'directory', 'phrase', 'affirmative-phrase', 'markdown-section']);
+const CHECK_LEVELS = new Set(['blocker', 'warning']);
+
+function validateCheck(check, index) {
+  const prefix = `checklist checks[${index}]`;
+  if (!check || typeof check !== 'object' || Array.isArray(check)) {
+    throw new Error(`${prefix} must be an object`);
+  }
+  if (!CHECK_TYPES.has(check.type)) {
+    throw new Error(`${prefix}.type must be one of: ${[...CHECK_TYPES].join(', ')}`);
+  }
+  for (const field of ['id', 'description']) {
+    if (typeof check[field] !== 'string' || check[field].trim() === '') {
+      throw new Error(`${prefix}.${field} must be a non-empty string`);
+    }
+  }
+  if (check.level !== undefined && !CHECK_LEVELS.has(check.level)) {
+    throw new Error(`${prefix}.level must be one of: ${[...CHECK_LEVELS].join(', ')}`);
+  }
+  if (typeof check.path !== 'string' || check.path.trim() === '') {
+    throw new Error(`${prefix}.path must be a non-empty string for type ${check.type}`);
+  }
+  if (check.type === 'phrase' || check.type === 'affirmative-phrase') {
+    validateStringList(check.phrases, `${prefix}.phrases`, check.type);
+  }
+  if (check.type === 'markdown-section') {
+    validateStringList(check.headings, `${prefix}.headings`, check.type);
+  }
+}
+
+function validateStringList(value, field, type) {
+  if (!Array.isArray(value) || value.length === 0 || value.some((item) => typeof item !== 'string' || item.trim() === '')) {
+    throw new Error(`${field} must be a non-empty array of non-empty strings for type ${type}`);
+  }
 }
 
 async function runCheck(root, check) {
