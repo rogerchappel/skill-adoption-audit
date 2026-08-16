@@ -65,8 +65,10 @@ standard error.
 - `SKILL.md` exists and affirmatively states when to use the skill
 - Required inputs have affirmative documentation
 - Side-effect boundaries and approval requirements are affirmatively stated
-- An `Example` or `Examples` Markdown section contains a non-empty fenced code block
-- A `Validation` or `Verification` Markdown section contains a non-empty fenced code block
+- An `Example` or `Examples` Markdown section contains a non-empty CommonMark
+  backtick or tilde fenced code block
+- A `Validation` or `Verification` Markdown section contains a non-empty CommonMark
+  backtick or tilde fenced code block
 - README, docs, fixtures, package metadata, and tests are discoverable
 
 ## Limitations
@@ -81,7 +83,10 @@ standard error.
   approval is required` documents an approval boundary. Headings alone do not
   qualify.
 - Example and verification evidence requires a matching Markdown heading and a
-  non-empty fenced code block; keyword mentions and placeholder-only sections do
+  non-empty CommonMark fenced code block. Backtick and tilde fences of at least
+  three characters are supported, including normal info strings; closing fences
+  must use the same character and be at least as long as the opening fence.
+  Keyword mentions, empty or unclosed fences, and placeholder-only sections do
   not qualify.
 - It does not prove that examples are semantically correct.
 - Custom checklist support augments the default checks; it does not remove the
