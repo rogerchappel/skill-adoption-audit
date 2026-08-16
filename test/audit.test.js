@@ -116,3 +116,36 @@ test('accepts example and verification sections with executable evidence', async
   assert.equal(report.results.find(({ id }) => id === 'examples').status, 'pass');
   assert.equal(report.results.find(({ id }) => id === 'verification').status, 'pass');
 });
+
+test('accepts tilde fences and longer matching closing fences with info strings', async () => {
+  const report = await auditWithSkillMarkdown(`${requiredDocumentation}
+## Examples
+~~~javascript linenums="1"
+console.log('example');
+~~~~
+## Verification
+   ~~~~ shell session
+npm test
+   ~~~~`);
+  assert.equal(report.results.find(({ id }) => id === 'examples').status, 'pass');
+  assert.equal(report.results.find(({ id }) => id === 'verification').status, 'pass');
+});
+
+test('rejects empty, unclosed, and mismatched fenced code blocks', async () => {
+  const cases = [
+    ['```bash\n```', '~~~sh\n~~~'],
+    ['```bash\nnode example.js', '~~~sh\nnpm test'],
+    ['```bash\nnode example.js\n~~~', '~~~sh\nnpm test\n```'],
+    ['````bash\nnode example.js\n```', '~~~~sh\nnpm test\n~~~']
+  ];
+
+  for (const [example, verification] of cases) {
+    const report = await auditWithSkillMarkdown(`${requiredDocumentation}
+## Examples
+${example}
+## Verification
+${verification}`);
+    assert.equal(report.results.find(({ id }) => id === 'examples').status, 'fail');
+    assert.equal(report.results.find(({ id }) => id === 'verification').status, 'fail');
+  }
+});
