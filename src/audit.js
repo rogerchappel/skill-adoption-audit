@@ -175,7 +175,33 @@ function hasUsableMarkdownSection(content, headings) {
 
     const body = section.join('\n').trim();
     if (!body || /^(?:tbd|todo|pending|coming soon|none|n\/a)[.!\s]*$/i.test(body)) continue;
-    if (/```[\w-]*\n[\s\S]*?\S[\s\S]*?```/.test(body)) return true;
+    if (hasNonEmptyFencedCodeBlock(body)) return true;
+  }
+
+  return false;
+}
+
+function hasNonEmptyFencedCodeBlock(content) {
+  const lines = content.split('\n');
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const opening = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(lines[index]);
+    if (!opening) continue;
+
+    const marker = opening[1][0];
+    if (marker === '`' && opening[2].includes('`')) continue;
+
+    const minimumLength = opening[1].length;
+    const closing = new RegExp(`^ {0,3}\\${marker}{${minimumLength},}[ \\t]*$`);
+    let hasContent = false;
+
+    for (index += 1; index < lines.length; index += 1) {
+      if (closing.test(lines[index])) {
+        if (hasContent) return true;
+        break;
+      }
+      if (/\S/.test(lines[index])) hasContent = true;
+    }
   }
 
   return false;
