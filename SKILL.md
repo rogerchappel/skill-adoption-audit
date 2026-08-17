@@ -47,7 +47,9 @@ claims, direct negation or prohibition of the matching term, and placeholder-onl
 statements do not qualify. Negative safety boundaries do qualify: `performs no
 writes` supports side-effect evidence, and `no approval is required` states an
 approval boundary. Example and verification evidence qualifies only when the
-corresponding Markdown heading contains a non-empty fenced code block. Custom
+corresponding Markdown heading contains a non-empty fenced code block.
+ATX headings follow CommonMark indentation: zero to three leading spaces are
+accepted, while four-space-indented heading-like text is code. Custom
 checklist phrase checks remain literal, case-insensitive substring matches and
 always augment the defaults.
 
