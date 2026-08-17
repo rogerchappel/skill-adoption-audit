@@ -159,13 +159,13 @@ function hasUsableMarkdownSection(content, headings) {
   const lines = content.split(/\r?\n/);
 
   for (let index = 0; index < lines.length; index += 1) {
-    const match = /^(#{1,6})\s+(.+?)\s*$/.exec(lines[index]);
+    const match = /^ {0,3}(#{1,6})\s+(.+?)\s*$/.exec(lines[index]);
     if (!match || !wanted.has(match[2].replace(/\s+#+$/, '').toLowerCase())) continue;
 
     const level = match[1].length;
     const section = [];
     for (index += 1; index < lines.length; index += 1) {
-      const nextHeading = /^(#{1,6})\s+/.exec(lines[index]);
+      const nextHeading = /^ {0,3}(#{1,6})\s+/.exec(lines[index]);
       if (nextHeading && nextHeading[1].length <= level) {
         index -= 1;
         break;
