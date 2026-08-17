@@ -115,3 +115,12 @@ test('strict JSON output blocks misleading default phrase evidence', () => {
   ]);
   assert.ok(report.warnings.some(({ id }) => id === 'approval'));
 });
+
+test('CLI accepts CommonMark-indented evidence headings', () => {
+  const result = runCli('fixtures/indented-headings', '--format', 'json');
+  const report = JSON.parse(result.stdout);
+
+  assert.equal(result.status, 0);
+  assert.equal(report.results.find(({ id }) => id === 'examples').status, 'pass');
+  assert.equal(report.results.find(({ id }) => id === 'verification').status, 'pass');
+});

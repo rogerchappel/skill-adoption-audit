@@ -117,6 +117,28 @@ test('accepts example and verification sections with executable evidence', async
   assert.equal(report.results.find(({ id }) => id === 'verification').status, 'pass');
 });
 
+test('accepts ATX evidence headings indented up to three spaces', async () => {
+  const report = await auditSkill('fixtures/indented-headings');
+
+  assert.equal(report.results.find(({ id }) => id === 'examples').status, 'pass');
+  assert.equal(report.results.find(({ id }) => id === 'verification').status, 'pass');
+});
+
+test('rejects four-space indented text that resembles ATX evidence headings', async () => {
+  const report = await auditWithSkillMarkdown(`${requiredDocumentation}
+    ## Examples
+\`\`\`bash
+node example.js
+\`\`\`
+    ## Verification
+\`\`\`bash
+npm test
+\`\`\``);
+
+  assert.equal(report.results.find(({ id }) => id === 'examples').status, 'fail');
+  assert.equal(report.results.find(({ id }) => id === 'verification').status, 'fail');
+});
+
 test('accepts tilde fences and longer matching closing fences with info strings', async () => {
   const report = await auditWithSkillMarkdown(`${requiredDocumentation}
 ## Examples
