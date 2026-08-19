@@ -124,3 +124,12 @@ test('CLI accepts CommonMark-indented evidence headings', () => {
   assert.equal(report.results.find(({ id }) => id === 'examples').status, 'pass');
   assert.equal(report.results.find(({ id }) => id === 'verification').status, 'pass');
 });
+
+test('CLI rejects four-space indented affirmative headings', () => {
+  const result = runCli('fixtures/four-space-affirmative-headings', '--format', 'json');
+  const report = JSON.parse(result.stdout);
+
+  for (const id of ['when-to-use', 'required-inputs', 'side-effects', 'approval']) {
+    assert.equal(report.results.find((item) => item.id === id).status, 'fail');
+  }
+});

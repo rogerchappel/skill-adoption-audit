@@ -102,7 +102,7 @@ function hasAffirmativePhrase(content, phrases) {
   const lines = content.split(/\r?\n/);
   const statements = content
     .split(/\r?\n/)
-    .filter((line) => !/^\s*#{1,6}\s+/.test(line))
+    .filter((line) => !parseAtxHeading(line) && !/^(?: {4}|\t)/.test(line))
     .flatMap((line) => line.split(/(?<=[.!?;])\s+/))
     .map((statement) => statement.replace(/^\s*(?:[-*+]\s+|\d+[.)]\s+)/, '').trim().toLowerCase())
     .filter(Boolean);
@@ -116,11 +116,11 @@ function hasAffirmativePhrase(content, phrases) {
   if (wanted.includes('read-only') && statements.some(hasNoWriteBoundary)) return true;
 
   for (let index = 0; index < lines.length; index += 1) {
-    const heading = /^\s*#{1,6}\s+(.+?)\s*#*\s*$/.exec(lines[index]);
-    if (!heading || !wanted.some((phrase) => heading[1].toLowerCase().includes(phrase))) continue;
+    const heading = parseAtxHeading(lines[index]);
+    if (!heading || !wanted.some((phrase) => heading.text.toLowerCase().includes(phrase))) continue;
 
     const body = [];
-    for (index += 1; index < lines.length && !/^\s*#{1,6}\s+/.test(lines[index]); index += 1) {
+    for (index += 1; index < lines.length && !parseAtxHeading(lines[index]); index += 1) {
       body.push(lines[index]);
     }
     index -= 1;
@@ -130,6 +130,12 @@ function hasAffirmativePhrase(content, phrases) {
   }
 
   return false;
+}
+
+function parseAtxHeading(line) {
+  const match = /^ {0,3}(#{1,6})\s+(.+?)\s*$/.exec(line);
+  if (!match) return null;
+  return { level: match[1].length, text: match[2].replace(/\s+#+$/, '') };
 }
 
 function hasDirectNegation(statement, phrase) {
@@ -159,14 +165,14 @@ function hasUsableMarkdownSection(content, headings) {
   const lines = content.split(/\r?\n/);
 
   for (let index = 0; index < lines.length; index += 1) {
-    const match = /^ {0,3}(#{1,6})\s+(.+?)\s*$/.exec(lines[index]);
-    if (!match || !wanted.has(match[2].replace(/\s+#+$/, '').toLowerCase())) continue;
+    const match = parseAtxHeading(lines[index]);
+    if (!match || !wanted.has(match.text.toLowerCase())) continue;
 
-    const level = match[1].length;
+    const level = match.level;
     const section = [];
     for (index += 1; index < lines.length; index += 1) {
-      const nextHeading = /^ {0,3}(#{1,6})\s+/.exec(lines[index]);
-      if (nextHeading && nextHeading[1].length <= level) {
+      const nextHeading = parseAtxHeading(lines[index]);
+      if (nextHeading && nextHeading.level <= level) {
         index -= 1;
         break;
       }
