@@ -133,3 +133,16 @@ test('CLI rejects four-space indented affirmative headings', () => {
     assert.equal(report.results.find((item) => item.id === id).status, 'fail');
   }
 });
+
+for (const fixture of ['fenced-affirmative-evidence', 'negated-heading-evidence']) {
+  test(`strict CLI rejects misleading affirmative evidence from ${fixture}`, () => {
+    const result = runCli(`fixtures/${fixture}`, '--format', 'json', '--strict');
+    const report = JSON.parse(result.stdout);
+
+    assert.equal(result.status, 2);
+    assert.equal(report.status, 'block');
+    for (const id of ['when-to-use', 'required-inputs', 'side-effects', 'approval']) {
+      assert.equal(report.results.find((item) => item.id === id).status, 'fail');
+    }
+  });
+}
