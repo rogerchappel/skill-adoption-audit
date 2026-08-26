@@ -99,6 +99,17 @@ test('rejects direct negation and prohibition for every default affirmative chec
   }
 });
 
+for (const fixture of ['fenced-affirmative-evidence', 'negated-heading-evidence']) {
+  test(`rejects misleading affirmative evidence from ${fixture}`, async () => {
+    const report = await auditSkill(`fixtures/${fixture}`);
+
+    for (const id of ['when-to-use', 'required-inputs', 'side-effects', 'approval']) {
+      assert.equal(report.results.find((result) => result.id === id).status, 'fail');
+    }
+    assert.equal(report.status, 'block');
+  });
+}
+
 test('does not accept negated example and verification keyword mentions', async () => {
   const report = await auditWithSkillMarkdown(`${requiredDocumentation}\nNo examples are included. Verification does not exist.`);
   assert.equal(report.results.find(({ id }) => id === 'examples').status, 'fail');
