@@ -99,9 +99,8 @@ async function runCheck(root, check) {
 
 function hasAffirmativePhrase(content, phrases) {
   const wanted = phrases.map((phrase) => String(phrase).toLowerCase());
-  const lines = content.split(/\r?\n/);
-  const statements = content
-    .split(/\r?\n/)
+  const lines = linesOutsideFencedCode(content);
+  const statements = lines
     .filter((line) => !parseAtxHeading(line) && !/^(?: {4}|\t)/.test(line))
     .flatMap((line) => line.split(/(?<=[.!?;])\s+/))
     .map((statement) => statement.replace(/^\s*(?:[-*+]\s+|\d+[.)]\s+)/, '').trim().toLowerCase())
@@ -126,10 +125,31 @@ function hasAffirmativePhrase(content, phrases) {
     index -= 1;
 
     const statement = body.join(' ').replace(/\s+/g, ' ').trim().toLowerCase();
-    if (statement && !hasMissingOrPlaceholderClaim(statement)) return true;
+    const headingPhrase = wanted.find((candidate) => heading.text.toLowerCase().includes(candidate));
+    const negatedBodyPhrase = wanted.some((candidate) => statement.includes(candidate) && hasDirectNegation(statement, candidate));
+    if (statement && headingPhrase && !negatedBodyPhrase && !hasDirectNegation(statement, headingPhrase) && !hasMissingOrPlaceholderClaim(statement)) return true;
   }
 
   return false;
+}
+
+function linesOutsideFencedCode(content) {
+  const lines = content.split(/\r?\n/);
+  let fence = null;
+
+  return lines.map((line) => {
+    if (fence) {
+      const closing = new RegExp(`^ {0,3}\\${fence.marker}{${fence.minimumLength},}[ \\t]*$`);
+      if (closing.test(line)) fence = null;
+      return '';
+    }
+
+    const opening = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
+    if (!opening || (opening[1][0] === '`' && opening[2].includes('`'))) return line;
+
+    fence = { marker: opening[1][0], minimumLength: opening[1].length };
+    return '';
+  });
 }
 
 function parseAtxHeading(line) {
@@ -140,10 +160,11 @@ function parseAtxHeading(line) {
 
 function hasDirectNegation(statement, phrase) {
   const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const before = new RegExp(`\\b(?:do|does|must|should|may|can|will)\\s+not\\s+(?:\\w+[ -]?){0,3}${escaped}\\b`);
-  const neverBefore = new RegExp(`\\bnever\\s+(?:\\w+[ -]?){0,3}${escaped}\\b`);
-  const after = new RegExp(`\\b${escaped}\\b.{0,32}\\b(?:is|are|be|being)\\s+(?:not\\s+(?:accepted|allowed|provided|supported|used)|prohibited|forbidden|disallowed)\\b`);
-  const directlyNegated = new RegExp(`\\bnot\\s+${escaped}\\b`);
+  const term = `${escaped}s?`;
+  const before = new RegExp(`\\b(?:do|does|must|should|may|can|will)\\s+not\\s+(?:\\w+[ -]?){0,3}${term}\\b`);
+  const neverBefore = new RegExp(`\\bnever\\s+(?:\\w+[ -]?){0,3}${term}\\b`);
+  const after = new RegExp(`\\b${term}\\b.{0,32}\\b(?:is|are|be|being)\\s+(?:not\\s+(?:accepted|allowed|provided|supported|used)|prohibited|forbidden|disallowed)\\b`);
+  const directlyNegated = new RegExp(`\\bnot\\s+${term}\\b`);
   return before.test(statement) || neverBefore.test(statement) || after.test(statement) || directlyNegated.test(statement);
 }
 
