@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 
 function runCli(...args) {
   return spawnSync(process.execPath, ['src/cli.js', ...args], {
@@ -8,6 +11,32 @@ function runCli(...args) {
     encoding: 'utf8'
   });
 }
+
+test('strict CLI rejects placeholder-only backtick and tilde fences', () => {
+  for (const fence of ['```', '~~~']) {
+    const root = mkdtempSync(path.join(tmpdir(), 'skill-adoption-cli-'));
+    writeFileSync(path.join(root, 'SKILL.md'), `# Placeholder Skill
+Use this skill for local audits.
+Inputs: a local skill directory.
+All operations are read-only.
+Ask for approval before writing files.
+## Examples
+${fence}text
+TBD.
+${fence}
+## Verification
+${fence}text
+N/A!
+${fence}
+`);
+
+    const result = runCli(root, '--format', 'json', '--strict');
+    const report = JSON.parse(result.stdout);
+    assert.notEqual(result.status, 0);
+    assert.equal(report.results.find(({ id }) => id === 'examples').status, 'fail');
+    assert.equal(report.results.find(({ id }) => id === 'verification').status, 'fail');
+  }
+});
 
 test('accepts each documented option', () => {
   const checklist = runCli('fixtures/good-skill', '--checklist', 'fixtures/checklist.json');

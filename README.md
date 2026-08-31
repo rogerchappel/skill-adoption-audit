@@ -89,7 +89,9 @@ standard error.
   ATX headings may use zero to three leading spaces; four-space-indented text is
   treated as code rather than a section heading.
   Keyword mentions, empty or unclosed fences, and placeholder-only sections do
-  not qualify.
+  not qualify. Fenced content containing only `TBD`, `TODO`, `pending`,
+  `coming soon`, `none`, or `n/a` is a placeholder; matching is
+  case-insensitive and permits surrounding punctuation.
 - It does not prove that examples are semantically correct.
 - Custom checklist support augments the default checks; it does not remove the
   safety checks. Custom phrase checks retain literal, case-insensitive substring

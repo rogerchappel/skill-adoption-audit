@@ -128,6 +128,27 @@ test('accepts example and verification sections with executable evidence', async
   assert.equal(report.results.find(({ id }) => id === 'verification').status, 'pass');
 });
 
+test('rejects placeholder-only fenced example and verification evidence', async () => {
+  const placeholders = ['TBD', 'todo.', 'Pending!', 'COMING SOON', 'none...', 'N/A'];
+
+  for (const placeholder of placeholders) {
+    for (const fence of ['```', '~~~']) {
+      const report = await auditWithSkillMarkdown(`${requiredDocumentation}
+## Examples
+${fence}text
+${placeholder}
+${fence}
+## Verification
+${fence}text
+${placeholder}
+${fence}`);
+
+      assert.equal(report.results.find(({ id }) => id === 'examples').status, 'fail');
+      assert.equal(report.results.find(({ id }) => id === 'verification').status, 'fail');
+    }
+  }
+});
+
 test('accepts ATX evidence headings indented up to three spaces', async () => {
   const report = await auditSkill('fixtures/indented-headings');
 

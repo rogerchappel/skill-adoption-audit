@@ -201,7 +201,7 @@ function hasUsableMarkdownSection(content, headings) {
     }
 
     const body = section.join('\n').trim();
-    if (!body || /^(?:tbd|todo|pending|coming soon|none|n\/a)[.!\s]*$/i.test(body)) continue;
+    if (!body || isPlaceholderText(body)) continue;
     if (hasNonEmptyFencedCodeBlock(body)) return true;
   }
 
@@ -220,18 +220,23 @@ function hasNonEmptyFencedCodeBlock(content) {
 
     const minimumLength = opening[1].length;
     const closing = new RegExp(`^ {0,3}\\${marker}{${minimumLength},}[ \\t]*$`);
-    let hasContent = false;
+    const fencedLines = [];
 
     for (index += 1; index < lines.length; index += 1) {
       if (closing.test(lines[index])) {
-        if (hasContent) return true;
+        const fencedContent = fencedLines.join('\n').trim();
+        if (fencedContent && !isPlaceholderText(fencedContent)) return true;
         break;
       }
-      if (/\S/.test(lines[index])) hasContent = true;
+      fencedLines.push(lines[index]);
     }
   }
 
   return false;
+}
+
+function isPlaceholderText(content) {
+  return /^[\s"'([{]*(?:tbd|todo|pending|coming soon|none|n\/a)[\s.!?,;:'"\])}]*$/i.test(content);
 }
 
 function withStatus(check, passed) {
