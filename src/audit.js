@@ -161,11 +161,13 @@ function parseAtxHeading(line) {
 function hasDirectNegation(statement, phrase) {
   const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const term = `${escaped}s?`;
+  const affirmativeBridge = new RegExp(`\\b(?:do|does|must|should|may|can|will)\\s+not\\s+(?:hesitate|forget|fail|neglect)\\s+to\\s+${term}\\b`, 'g');
+  const scopedStatement = statement.replace(affirmativeBridge, '');
   const before = new RegExp(`\\b(?:do|does|must|should|may|can|will)\\s+not\\s+(?:\\w+[ -]?){0,3}${term}\\b`);
   const neverBefore = new RegExp(`\\bnever\\s+(?:\\w+[ -]?){0,3}${term}\\b`);
   const after = new RegExp(`\\b${term}\\b.{0,32}\\b(?:is|are|be|being)\\s+(?:not\\s+(?:accepted|allowed|provided|supported|used)|prohibited|forbidden|disallowed)\\b`);
   const directlyNegated = new RegExp(`\\bnot\\s+${term}\\b`);
-  return before.test(statement) || neverBefore.test(statement) || after.test(statement) || directlyNegated.test(statement);
+  return before.test(scopedStatement) || neverBefore.test(scopedStatement) || after.test(scopedStatement) || directlyNegated.test(scopedStatement);
 }
 
 function hasNoWriteBoundary(statement) {
