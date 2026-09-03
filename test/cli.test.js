@@ -175,3 +175,18 @@ for (const fixture of ['fenced-affirmative-evidence', 'negated-heading-evidence'
     }
   });
 }
+
+test('CLI distinguishes an affirmative governing idiom from direct negation', () => {
+  const reports = [
+    ['Do not hesitate to use this skill for local review.', 'pass'],
+    ['Do not use this skill for local review.', 'fail']
+  ].map(([sentence, expected]) => {
+    const root = mkdtempSync(path.join(tmpdir(), 'skill-adoption-cli-negation-'));
+    writeFileSync(path.join(root, 'SKILL.md'), `# Negation Fixture\n${sentence}\n`);
+    const result = runCli(root, '--format', 'json');
+    assert.equal(result.status, 0);
+    assert.equal(JSON.parse(result.stdout).results.find(({ id }) => id === 'when-to-use').status, expected);
+  });
+
+  assert.equal(reports.length, 2);
+});
