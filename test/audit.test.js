@@ -83,6 +83,29 @@ Ask for approval before writing outside the package.
   }
 });
 
+test('accepts use evidence behind a negated governing idiom', async () => {
+  const report = await auditWithSkillMarkdown(`# Affirmative Governing Idiom
+Do not hesitate to use this skill for local review.
+Inputs are documented.
+This is read-only.
+Approval is required before changes.
+`);
+
+  assert.equal(report.results.find(({ id }) => id === 'when-to-use').status, 'pass');
+  assert.equal(report.status, 'block');
+});
+
+test('still rejects direct and genuinely governed negation of use evidence', async () => {
+  for (const sentence of [
+    'Do not use this skill for local review.',
+    'Do not attempt to use this skill for local review.',
+    'Never use this skill for local review.'
+  ]) {
+    const report = await auditWithSkillMarkdown(`# Negated Use\n${sentence}`);
+    assert.equal(report.results.find(({ id }) => id === 'when-to-use').status, 'fail');
+  }
+});
+
 test('accepts affirmative fixture including negative safety boundaries', async () => {
   const report = await auditSkill('fixtures/affirmative-evidence');
 
