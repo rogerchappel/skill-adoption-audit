@@ -80,8 +80,11 @@ standard error.
   is disallowed`) does not qualify. Neither do missing-evidence claims such as `not
   documented` or placeholders such as `TBD`. Negative safety boundaries remain
   valid evidence: `performs no writes` supports the side-effect check, and `no
-  approval is required` documents an approval boundary. Headings alone do not
-  qualify.
+  approval is required` documents an approval boundary. Negation is scoped to
+  the matching evidence phrase, so affirmative intervening idioms such as `do
+  not hesitate to use this skill` qualify while direct or genuinely governed
+  negation such as `do not use this skill` and `do not attempt to use this
+  skill` does not. Headings alone do not qualify.
 - Example and verification evidence requires a matching Markdown heading and a
   non-empty CommonMark fenced code block. Backtick and tilde fences of at least
   three characters are supported, including normal info strings; closing fences
