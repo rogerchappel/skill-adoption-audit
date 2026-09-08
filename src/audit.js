@@ -100,8 +100,10 @@ async function runCheck(root, check) {
 function hasAffirmativePhrase(content, phrases) {
   const wanted = phrases.map((phrase) => String(phrase).toLowerCase());
   const lines = linesOutsideFencedCode(content);
+  const headings = parseMarkdownHeadings(content);
+  const headingLines = new Set(headings.flatMap(({ startLine, endLine }) => [startLine, endLine]));
   const statements = lines
-    .filter((line) => !parseAtxHeading(line) && !/^(?: {4}|\t)/.test(line))
+    .filter((line, index) => !headingLines.has(index) && !/^(?: {4}|\t)/.test(line))
     .flatMap((line) => line.split(/(?<=[.!?;])\s+/))
     .map((statement) => statement.replace(/^\s*(?:[-*+]\s+|\d+[.)]\s+)/, '').trim().toLowerCase())
     .filter(Boolean);
@@ -114,15 +116,12 @@ function hasAffirmativePhrase(content, phrases) {
 
   if (wanted.includes('read-only') && statements.some(hasNoWriteBoundary)) return true;
 
-  for (let index = 0; index < lines.length; index += 1) {
-    const heading = parseAtxHeading(lines[index]);
+  for (let index = 0; index < headings.length; index += 1) {
+    const heading = headings[index];
     if (!heading || !wanted.some((phrase) => heading.text.toLowerCase().includes(phrase))) continue;
 
-    const body = [];
-    for (index += 1; index < lines.length && !parseAtxHeading(lines[index]); index += 1) {
-      body.push(lines[index]);
-    }
-    index -= 1;
+    const nextHeading = headings[index + 1];
+    const body = lines.slice(heading.endLine + 1, nextHeading?.startLine ?? lines.length);
 
     const statement = body.join(' ').replace(/\s+/g, ' ').trim().toLowerCase();
     const headingPhrase = wanted.find((candidate) => heading.text.toLowerCase().includes(candidate));
@@ -158,6 +157,33 @@ function parseAtxHeading(line) {
   return { level: match[1].length, text: match[2].replace(/\s+#+$/, '') };
 }
 
+function parseMarkdownHeadings(content) {
+  const lines = linesOutsideFencedCode(content);
+  const headings = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const atx = parseAtxHeading(lines[index]);
+    if (atx) {
+      headings.push({ ...atx, startLine: index, endLine: index });
+      continue;
+    }
+
+    if (!lines[index].trim() || /^(?: {4}|\t)/.test(lines[index])) continue;
+    const underline = /^ {0,3}(=+|-+)[ \t]*$/.exec(lines[index + 1] ?? '');
+    if (!underline) continue;
+
+    headings.push({
+      level: underline[1][0] === '=' ? 1 : 2,
+      text: lines[index].trim(),
+      startLine: index,
+      endLine: index + 1
+    });
+    index += 1;
+  }
+
+  return headings;
+}
+
 function hasDirectNegation(statement, phrase) {
   const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const term = `${escaped}s?`;
@@ -186,21 +212,14 @@ function hasMissingOrPlaceholderClaim(statement) {
 function hasUsableMarkdownSection(content, headings) {
   const wanted = new Set(headings.map((heading) => String(heading).toLowerCase()));
   const lines = content.split(/\r?\n/);
+  const parsedHeadings = parseMarkdownHeadings(content);
 
-  for (let index = 0; index < lines.length; index += 1) {
-    const match = parseAtxHeading(lines[index]);
+  for (let index = 0; index < parsedHeadings.length; index += 1) {
+    const match = parsedHeadings[index];
     if (!match || !wanted.has(match.text.toLowerCase())) continue;
 
-    const level = match.level;
-    const section = [];
-    for (index += 1; index < lines.length; index += 1) {
-      const nextHeading = parseAtxHeading(lines[index]);
-      if (nextHeading && nextHeading.level <= level) {
-        index -= 1;
-        break;
-      }
-      section.push(lines[index]);
-    }
+    const boundary = parsedHeadings.slice(index + 1).find((heading) => heading.level <= match.level);
+    const section = lines.slice(match.endLine + 1, boundary?.startLine ?? lines.length);
 
     const body = section.join('\n').trim();
     if (!body || isPlaceholderText(body)) continue;
@@ -230,6 +249,8 @@ function hasNonEmptyFencedCodeBlock(content) {
         if (fencedContent && !isPlaceholderText(fencedContent)) return true;
         break;
       }
+      const competingFence = /^ {0,3}(`{3,}|~{3,})/.exec(lines[index]);
+      if (competingFence && competingFence[1][0] !== marker) break;
       fencedLines.push(lines[index]);
     }
   }
