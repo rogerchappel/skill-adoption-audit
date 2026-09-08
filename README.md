@@ -89,8 +89,10 @@ standard error.
   non-empty CommonMark fenced code block. Backtick and tilde fences of at least
   three characters are supported, including normal info strings; closing fences
   must use the same character and be at least as long as the opening fence.
-  ATX headings may use zero to three leading spaces; four-space-indented text is
-  treated as code rather than a section heading.
+  ATX headings and level-one/level-two Setext headings are supported outside
+  fenced and indented code. Both forms may use zero to three leading spaces;
+  four-space-indented text is treated as code rather than a section heading.
+  Sections end at the next heading of the same or a higher level.
   Keyword mentions, empty or unclosed fences, and placeholder-only sections do
   not qualify. Fenced content containing only `TBD`, `TODO`, `pending`,
   `coming soon`, `none`, or `n/a` is a placeholder; matching is
