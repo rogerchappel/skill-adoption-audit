@@ -154,6 +154,16 @@ test('CLI accepts CommonMark-indented evidence headings', () => {
   assert.equal(report.results.find(({ id }) => id === 'verification').status, 'pass');
 });
 
+test('strict CLI accepts complete Setext-headed skills', () => {
+  const result = runCli('fixtures/setext-headings', '--format', 'json', '--strict');
+  const report = JSON.parse(result.stdout);
+
+  assert.equal(result.status, 0);
+  assert.equal(report.status, 'pass');
+  assert.equal(report.results.find(({ id }) => id === 'examples').status, 'pass');
+  assert.equal(report.results.find(({ id }) => id === 'verification').status, 'pass');
+});
+
 test('CLI rejects four-space indented affirmative headings', () => {
   const result = runCli('fixtures/four-space-affirmative-headings', '--format', 'json');
   const report = JSON.parse(result.stdout);

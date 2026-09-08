@@ -179,6 +179,38 @@ test('accepts ATX evidence headings indented up to three spaces', async () => {
   assert.equal(report.results.find(({ id }) => id === 'verification').status, 'pass');
 });
 
+test('accepts Setext evidence and affirmative headings', async () => {
+  const report = await auditSkill('fixtures/setext-headings');
+
+  assert.equal(report.status, 'pass');
+  for (const id of ['when-to-use', 'required-inputs', 'side-effects', 'approval', 'examples', 'verification']) {
+    assert.equal(report.results.find((result) => result.id === id).status, 'pass');
+  }
+});
+
+test('rejects Setext-like headings in fenced or indented code and malformed underlines', async () => {
+  const report = await auditWithSkillMarkdown(`${requiredDocumentation}
+\`\`\`markdown
+Examples
+--------
+\`\`\`
+    Validation
+    ----------
+Examples
+--- trailing text
+~~~sh
+node example.js
+~~~
+Verification
+- - -
+~~~sh
+npm test
+~~~`);
+
+  assert.equal(report.results.find(({ id }) => id === 'examples').status, 'fail');
+  assert.equal(report.results.find(({ id }) => id === 'verification').status, 'fail');
+});
+
 test('rejects four-space indented headings for every affirmative check', async () => {
   const report = await auditSkill('fixtures/four-space-affirmative-headings');
 
