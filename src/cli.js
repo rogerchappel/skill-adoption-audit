@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 import { auditSkill, loadChecklist } from './audit.js';
-import { formatJson, formatMarkdown } from './report.js';
+import { formatJson, formatMarkdown, formatSarif } from './report.js';
 
 async function main(argv) {
   if (argv.length === 1 && (argv[0] === '--help' || argv[0] === '-h')) {
-    process.stdout.write('Usage: skill-adoption-audit <skill-dir> [--checklist checklist.json] [--format markdown|json] [--strict]\n');
+    process.stdout.write('Usage: skill-adoption-audit <skill-dir> [--checklist checklist.json] [--format markdown|json|sarif] [--strict]\n');
     return;
   }
 
   const [root, ...rest] = argv;
   if (!root) {
-    throw new Error('usage: skill-adoption-audit <skill-dir> [--checklist checklist.json] [--format markdown|json] [--strict]');
+    throw new Error('usage: skill-adoption-audit <skill-dir> [--checklist checklist.json] [--format markdown|json|sarif] [--strict]');
   }
   if (root.startsWith('--')) {
     throw new Error(`unknown option: ${root}`);
@@ -18,13 +18,15 @@ async function main(argv) {
 
   const flags = parseFlags(rest);
   const format = flags.format ?? 'markdown';
-  if (format !== 'markdown' && format !== 'json') {
-    throw new Error(`unsupported format: ${format}; expected markdown or json`);
+  if (!['markdown', 'json', 'sarif'].includes(format)) {
+    throw new Error(`unsupported format: ${format}; expected markdown, json, or sarif`);
   }
 
   const extraChecks = await loadChecklist(flags.checklist);
   const report = await auditSkill(root, { extraChecks });
-  process.stdout.write(format === 'json' ? formatJson(report) : formatMarkdown(report));
+  const formatters = { markdown: formatMarkdown, json: formatJson, sarif: formatSarif };
+  if (!formatters[format]) throw new Error(`unsupported format: ${format}`);
+  process.stdout.write(formatters[format](report));
 
   if (flags.strict === true && report.status !== 'pass') {
     process.exitCode = 2;
