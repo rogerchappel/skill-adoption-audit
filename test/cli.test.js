@@ -41,6 +41,7 @@ ${fence}
 test('accepts each documented option', () => {
   const checklist = runCli('fixtures/good-skill', '--checklist', 'fixtures/checklist.json');
   const format = runCli('fixtures/good-skill', '--format', 'json');
+  const sarif = runCli('fixtures/good-skill', '--format', 'sarif');
   const strict = runCli('fixtures/good-skill', '--strict');
 
   assert.equal(checklist.status, 0);
@@ -48,6 +49,8 @@ test('accepts each documented option', () => {
   assert.equal(format.status, 0);
   assert.equal(format.stderr, '');
   assert.doesNotThrow(() => JSON.parse(format.stdout));
+  assert.equal(sarif.status, 0);
+  assert.equal(JSON.parse(sarif.stdout).version, '2.1.0');
   assert.equal(strict.status, 0);
   assert.equal(strict.stderr, '');
 });
@@ -99,7 +102,7 @@ test('rejects unsupported output formats', () => {
 
   assert.equal(result.status, 1);
   assert.equal(result.stdout, '');
-  assert.match(result.stderr, /unsupported format: yaml; expected markdown or json/);
+  assert.match(result.stderr, /unsupported format: yaml; expected markdown, json, or sarif/);
 });
 
 for (const [fixture, message] of [

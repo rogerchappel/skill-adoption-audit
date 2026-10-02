@@ -11,6 +11,7 @@ npm install
 npm test
 npm run smoke
 node src/cli.js fixtures/good-skill --format json
+node src/cli.js fixtures/good-skill --format sarif
 node src/cli.js fixtures/weak-skill --strict
 ```
 
@@ -38,7 +39,7 @@ installed in the current project and does not download a missing package.
 ## CLI
 
 ```bash
-npx --no-install skill-adoption-audit <skill-dir> [--checklist checklist.json] [--format markdown|json] [--strict]
+npx --no-install skill-adoption-audit <skill-dir> [--checklist checklist.json] [--format markdown|json|sarif] [--strict]
 ```
 
 Strict mode exits non-zero when required adoption items are missing.
